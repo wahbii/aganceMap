@@ -18,11 +18,11 @@ class PlacesReader(val context: Context) {
      * Reads the list of place JSON objects in the file places.json
      * and returns a list of Place objects
      */
-    fun read(): List<Place> {
-        val itemType = object : TypeToken<List<PlaceResponse>>() {}.type
+    fun read(): List<InwiPosition> {
+        val itemType = object : TypeToken<List<InwiPosition>>() {}.type
         val reader = InputStreamReader(inputStream)
-        return gson.fromJson<List<PlaceResponse>>(reader, itemType).map {
-            it.toPlace()
+        return gson.fromJson<List<InwiPosition>>(reader, itemType).map {
+            it
         }
     }
 }

@@ -1,31 +1,40 @@
 package com.example.agancemap
 
-import androidx.appcompat.app.AppCompatActivity
+import BitmapHelper
+import android.app.Activity
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.Log
+import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
+import android.widget.TextView.OnEditorActionListener
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-
+import com.example.agancemap.databinding.ActivityMapsBinding
+import com.example.agancemap.models.InwiPosition
+import com.example.agancemap.models.Place
+import com.example.agancemap.models.PlacesReader
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.example.agancemap.databinding.ActivityMapsBinding
-import com.example.agancemap.models.Place
-import com.example.agancemap.models.PlaceRenderer
-import com.example.agancemap.models.PlacesReader
 import com.google.android.gms.maps.model.*
-import com.google.maps.android.clustering.ClusterManager
+
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
     private var circle: Circle? = null
-    private val places: List<Place> by lazy {
+    private val places: List<InwiPosition> by lazy {
         PlacesReader(this).read()
     }
     private val bicycleIcon: BitmapDescriptor by lazy {
-        val color = ContextCompat.getColor(this, R.color.purple_700)
-        BitmapHelper.vectorToBitmap(this, R.drawable.ic_baseline_directions_bike_24, color)
+        val color = ContextCompat.getColor(this, R.color.magento)
+        BitmapHelper.vectorToBitmap(this, R.drawable.ic_baseline_location_on_24, color)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,6 +47,72 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
+    }
+    fun resetView(){
+        binding.notfound.visibility=View.GONE
+
+    }
+
+    fun initComponent(googleMap: GoogleMap){
+        binding.search.imeOptions = EditorInfo.IME_ACTION_DONE
+        binding.search.setOnEditorActionListener(OnEditorActionListener { v, actionId, event ->
+            resetView()
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                var city=getInwiposition(binding.search.text.toString())
+                if(!city.isEmpty()){
+                    setMarkerToMap(googleMap = googleMap,city)
+                }else{
+                    binding.notfound.visibility=View.VISIBLE
+
+                }
+
+
+                return@OnEditorActionListener true
+            }
+            false
+        })
+        binding.search.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable) {
+                binding.cancel.visibility= View.VISIBLE
+                binding.filters.visibility=View.GONE
+                binding.search.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_launcher_foreground_magento, 0, 0, 0)
+            }
+            override fun beforeTextChanged(
+                s: CharSequence, start: Int,
+                count: Int, after: Int
+            ) {
+            }
+
+            override fun onTextChanged(
+                s: CharSequence, start: Int,
+                before: Int, count: Int
+            ) {
+                Log.d("00000", "onTextChanged: "+s)
+
+
+            }
+        })
+
+        binding.cancel.setOnClickListener {
+
+            binding.cancel.visibility= View.GONE
+            binding.filters.visibility=View.VISIBLE
+            binding.search.text.clear()
+            binding.search.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_launcher_foreground, 0, 0, 0)
+            hideKeyboard(this)
+        }
+    }
+    fun hideKeyboard(activity: Activity) {
+        val imm: InputMethodManager =
+            activity.getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        //Find the currently focused view, so we can grab the correct window token from it.
+        var view = activity.currentFocus
+        //If no view currently has focus, create a new one, just so we can grab a window token from it
+        if (view == null) {
+            view = View(activity)
+        }
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
     /**
@@ -49,28 +124,60 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
-    override fun onMapReady(googleMap: GoogleMap) {
 
+    fun getInwiposition(city:String):List<InwiPosition>{
+      return  places.filter { it.city.labelFr.toLowerCase().contains(city) }
+    }
+
+    fun setMarkerToMap(googleMap: GoogleMap,places: List<InwiPosition>){
         mMap = googleMap
         mMap.setInfoWindowAdapter(MarkerInfoWindowAdapter(this))
 
         // Add a marker in Sydney and move the camera
-        val sanfrancisco = LatLng(37.787994, -122.407437)
-        addClusteredMarkers(mMap)
+        val maroc = LatLng(31.791702, -7.092620)
+        // addClusteredMarkers(mMap)
 
-       /* places.forEach { place ->
+
+        places.forEach { place ->
+
+            var latLng=LatLng(place.latitude.toDouble(),place.logitude.toDouble())
             mMap.addMarker(
                 MarkerOptions()
-                    .title(place.name)
-                    .position(place.latLng)
+                    .title(place.label)
+                    .position(latLng)
                     .icon(bicycleIcon)
             )?.tag=place
 
-        }*/
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sanfrancisco,12F))
+        }
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(maroc,6F))
 
     }
-    private fun addClusteredMarkers(googleMap: GoogleMap) {
+    override fun onMapReady(googleMap: GoogleMap) {
+        initComponent(googleMap)
+
+      /*  mMap = googleMap
+        mMap.setInfoWindowAdapter(MarkerInfoWindowAdapter(this))
+
+        // Add a marker in Sydney and move the camera
+        val maroc = LatLng(31.791702, -7.092620)
+       // addClusteredMarkers(mMap)
+
+
+       places.forEach { place ->
+
+           var latLng=LatLng(place.latitude.toDouble(),place.logitude.toDouble())
+            mMap.addMarker(
+                MarkerOptions()
+                    .title(place.label)
+                    .position(latLng)
+                    .icon(bicycleIcon)
+            )?.tag=place
+
+        }
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(maroc,6F))
+
+    }*/
+    /*private fun addClusteredMarkers(googleMap: GoogleMap) {
         // Create the ClusterManager class and set the custom renderer.
         val clusterManager = ClusterManager<Place>(this, googleMap)
         clusterManager.renderer =
@@ -95,7 +202,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 addCircle(googleMap, item)
                 return@setOnClusterItemClickListener false
             }
-        }
+        }*/
     }
     private fun addCircle(googleMap: GoogleMap, item: Place) {
         circle?.remove()
