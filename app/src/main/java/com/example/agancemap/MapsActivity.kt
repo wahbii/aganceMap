@@ -10,9 +10,10 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView.OnEditorActionListener
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.agancemap.databinding.ActivityMapsBinding
 import com.example.agancemap.models.InwiPosition
 import com.example.agancemap.models.Place
@@ -22,9 +23,10 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import com.google.android.material.bottomsheet.BottomSheetDialog
 
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
@@ -35,6 +37,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private val bicycleIcon: BitmapDescriptor by lazy {
         val color = ContextCompat.getColor(this, R.color.magento)
         BitmapHelper.vectorToBitmap(this, R.drawable.ic_baseline_location_on_24, color)
+    }
+    private val adapterPlaces:AdapterPlaces by lazy {
+        AdapterPlaces(this, listOf())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,8 +67,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 var city=getInwiposition(binding.search.text.toString())
                 if(!city.isEmpty()){
                     setMarkerToMap(googleMap = googleMap,city)
+                    var layoutManager= LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL ,false)
+                    binding.places.layoutManager = layoutManager
+                    adapterPlaces.setListPlaces(city)
+
+                    binding.places.visibility=View.VISIBLE
+                    binding.places.adapter=adapterPlaces
                 }else{
                     binding.notfound.visibility=View.VISIBLE
+                    binding.places.visibility=View.GONE
 
                 }
 
@@ -130,9 +142,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     fun setMarkerToMap(googleMap: GoogleMap,places: List<InwiPosition>){
-        mMap = googleMap
-        mMap.setInfoWindowAdapter(MarkerInfoWindowAdapter(this))
 
+
+        mMap = googleMap
+       // mMap.setInfoWindowAdapter(MarkerInfoWindowAdapter(this))
+        mMap.setOnMarkerClickListener(this)
         // Add a marker in Sydney and move the camera
         val maroc = LatLng(31.791702, -7.092620)
         // addClusteredMarkers(mMap)
@@ -213,5 +227,21 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 .fillColor(ContextCompat.getColor(this, android.R.color.transparent))
                 .strokeColor(ContextCompat.getColor(this, R.color.purple_500))
         )
+    }
+
+    private fun showBottomSheet():BottomSheetDialog{
+        var dialog= BottomSheetDialog(this)
+        dialog.setContentView(R.layout.detail_agence_bottomsheet)
+
+        return dialog
+    }
+
+    override fun onMarkerClick(p0: Marker): Boolean {
+        var marker=p0
+        var inwiPosition= marker.tag
+        Log.d("0000", "onMarkerClick: ")
+
+        showBottomSheet().show()
+        return false
     }
 }
