@@ -1,30 +1,47 @@
 package com.example.agancemap
 
 import BitmapHelper
+import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.AutoCompleteTextView
+import android.widget.TextView
 import android.widget.TextView.OnEditorActionListener
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.agancemap.adapter.AdapterPlaces
+import com.example.agancemap.adapter.AdapterWorkingHours
+import com.example.agancemap.adapter.AutoCompleteAdapter
 import com.example.agancemap.databinding.ActivityMapsBinding
 import com.example.agancemap.models.InwiPosition
 import com.example.agancemap.models.Place
 import com.example.agancemap.models.PlacesReader
+import com.example.agancemap.utils.Utils
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import kotlin.math.log
 
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
@@ -36,18 +53,56 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val color = ContextCompat.getColor(this, R.color.magento)
         BitmapHelper.vectorToBitmap(this, R.drawable.ic_baseline_location_on_24, color)
     }
+    private val adapterPlaces: AdapterPlaces by lazy {
+        AdapterPlaces(this, listOf())
+    }
+
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var locationCallback: LocationCallback
+
+
+    private  val adapterWorkingHours:AdapterWorkingHours by lazy {
+        AdapterWorkingHours(this,listOf())
+    }
+    companion object{
+        private var CODE=100
+        lateinit  var location:LatLng
+        lateinit var instance:MapsActivity
+
+    }
+    @SuppressLint("MissingPermission")
+    fun getYourLocation(){
+            if(checkPermissions()){
+               fusedLocationClient=LocationServices.getFusedLocationProviderClient(this)
+                fusedLocationClient.lastLocation.addOnSuccessListener {
+                    try {
+                        location=LatLng(it.latitude,it.longitude)
+                    }catch (e:Exception){
+                        Log.d("", "getYourLocation: "+e.message)
+                    }
+
+                }
+            }else{
+                requestPermission()
+            }
+
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        instance=this
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        getYourLocation()
     }
     fun resetView(){
         binding.notfound.visibility=View.GONE
@@ -62,8 +117,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 var city=getInwiposition(binding.search.text.toString())
                 if(!city.isEmpty()){
                     setMarkerToMap(googleMap = googleMap,city)
+                    var layoutManager= LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL ,false)
+                    binding.places.layoutManager = layoutManager
+                    adapterPlaces.setListPlaces(city)
+
+                    binding.places.visibility=View.VISIBLE
+                    binding.places.adapter=adapterPlaces
                 }else{
                     binding.notfound.visibility=View.VISIBLE
+                    binding.places.visibility=View.GONE
 
                 }
 
@@ -89,7 +151,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 before: Int, count: Int
             ) {
                 Log.d("00000", "onTextChanged: "+s)
-
+                var autocomplete= binding.search
+                var countries: Array<out String> = getStringData(s.toString())
+                Log.d("AAAAA", "onTextChanged: "+countries.size)
+               var adapter = AutoCompleteAdapter(applicationContext,countries.asList())
+                autocomplete.setAdapter(adapter)
 
             }
         })
@@ -130,9 +196,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     fun setMarkerToMap(googleMap: GoogleMap,places: List<InwiPosition>){
-        mMap = googleMap
-        mMap.setInfoWindowAdapter(MarkerInfoWindowAdapter(this))
 
+
+        mMap = googleMap
+       // mMap.setInfoWindowAdapter(MarkerInfoWindowAdapter(this))
+        mMap.setOnMarkerClickListener(this)
         // Add a marker in Sydney and move the camera
         val maroc = LatLng(31.791702, -7.092620)
         // addClusteredMarkers(mMap)
@@ -213,5 +281,76 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 .fillColor(ContextCompat.getColor(this, android.R.color.transparent))
                 .strokeColor(ContextCompat.getColor(this, R.color.purple_500))
         )
+    }
+
+    private fun showBottomSheet(inwiposition:InwiPosition):BottomSheetDialog{
+        var dialog= BottomSheetDialog(this)
+        dialog.setContentView(R.layout.detail_agence_bottomsheet)
+        val behavior: BottomSheetBehavior<*> = dialog.behavior
+        behavior.state = BottomSheetBehavior.STATE_EXPANDED
+        var recyclerView=dialog.findViewById<RecyclerView>(R.id.workingours)
+        var adress=dialog.findViewById<TextView>(R.id.adress)
+        var phone=dialog.findViewById<TextView>(R.id.phones)
+        var inwi_agence=dialog.findViewById<TextView>(R.id.agence_inwi)
+        var distance=dialog.findViewById<TextView>(R.id.distance)
+        if(Utils.getDistance(LatLng(inwiposition.latitude.toDouble(),inwiposition.logitude.toDouble()))!=-1.00){
+            var elm= Utils.getDistance(LatLng(inwiposition.latitude.toDouble(),inwiposition.logitude.toDouble()))
+            distance?.text=elm.toString()+" km"
+        }else{
+            distance?.text="--- km"
+        }
+
+        adress?.text=inwiposition.addressFr
+        phone?.text=inwiposition.phone.get(0)+" . "+inwiposition.phone.get(1)
+        inwi_agence?.text=inwiposition.label+"-"+inwiposition.district.labelFr
+        adapterWorkingHours.setList(inwiposition.schedule)
+        recyclerView?.adapter=adapterWorkingHours
+        var layoutManager= LinearLayoutManager(this, LinearLayoutManager.VERTICAL ,false)
+        recyclerView?.layoutManager=layoutManager
+
+        return dialog
+    }
+
+    override fun onMarkerClick(p0: Marker): Boolean {
+        var marker=p0
+        var inwiPosition= marker.tag as InwiPosition
+        showBottomSheet(inwiPosition).show()
+        return false
+    }
+    private fun getWindowHeight(): Int {
+        // Calculate window height for fullscreen use
+        val displayMetrics = DisplayMetrics()
+        this.windowManager.defaultDisplay.getMetrics(displayMetrics)
+        return displayMetrics.heightPixels
+    }
+
+    fun requestPermission(){
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(
+                android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                android.Manifest.permission.ACCESS_FINE_LOCATION),
+            CODE
+        )
+    }
+    private fun checkPermissions(): Boolean {
+        return ((ActivityCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+        )) == PackageManager.PERMISSION_GRANTED
+                && (ActivityCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.ACCESS_FINE_LOCATION
+        )) == PackageManager.PERMISSION_GRANTED)
+
+    }
+    private  fun getStringData(elm:String): Array<out String> {
+        var data=ArrayList<String>()
+        places.forEach {
+            if(it.city.labelFr.contains(elm.trim())){
+                data.add(it.city.labelFr)
+            }
+        }
+        return  data.toTypedArray()
     }
 }

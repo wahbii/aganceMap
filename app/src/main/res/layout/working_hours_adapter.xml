@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="30dp"
+    android:weightSum="10"
+    android:gravity="center"
+    >
+    <TextView
+        android:id="@+id/day"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="3"
+        android:paddingHorizontal="15dp"
+        android:textSize="16dp"
+        android:textColor="#6A6774"
+        android:fontFamily="@font/basier_circle_regular"
+        android:text="Mardi"/>
+    <TextView
+        android:id="@+id/working_hours"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="7"
+        android:textSize="16dp"
+        android:textColor="#6A6774"
+        android:fontFamily="@font/basier_circle_regular"
+        android:text="9:30AM–1PM, 3:30–8PM"/>
+    <TextView
+        android:id="@+id/today"
+        android:visibility="gone"
+
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="3"
+        android:paddingHorizontal="15dp"
+        android:textSize="16dp"
+        android:textColor="#BE297E"
+        android:fontFamily="@font/basier_circle_medium"
+        android:text="Mardi"/>
+    <TextView
+        android:visibility="gone"
+        android:id="@+id/todayworking_hours"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="7"
+        android:textSize="16dp"
+        android:textColor="#BE297E"
+        android:fontFamily="@font/basier_circle_medium"
+        android:text="9:30AM–1PM, 3:30–8PM"/>
+
+
+</LinearLayout>
