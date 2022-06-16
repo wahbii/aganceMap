@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_item"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
+    android:layout_marginEnd="4dp"
+    android:layout_marginStart="2dp"
+    app:cardCornerRadius="10dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <View
+            android:id="@+id/open_sheet"
+            android:layout_width="40dp"
+            android:layout_height="4dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="24dp"
+            android:background="?android:attr/listDivider"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/agency_name"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/basier_circle_bold"
+            android:text="Agence Wardia"
+            android:textColor="#4F2667"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/open_sheet" />
+
+        <TextView
+            android:id="@+id/distance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:fontFamily="@font/basier_circle_medium"
+            android:text="0.5 km"
+            android:textColor="#9C9FA5"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/open_sheet" />
+
+        <TextView
+            android:id="@+id/agency_address"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="18dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="56dp"
+            android:fontFamily="@font/basier_circle_regular"
+            android:text="TextView"
+            android:lines="2"
+            android:ellipsize="end"
+            android:textColor="#6A6774"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/agency_name" />
+
+        <TextView
+            android:id="@+id/is_open"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="18dp"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/basier_circle_regular"
+            android:text="Ouverte"
+            android:textColor="#17A474"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/agency_address" />
+
+        <TextView
+            android:id="@+id/working_hours"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="16dp"
+            android:text="- Ferme 20:00 PM"
+            android:fontFamily="@font/basier_circle_regular"
+            android:textColor="#82808D"
+            app:layout_constraintStart_toEndOf="@+id/is_open"
+            app:layout_constraintTop_toBottomOf="@+id/agency_address" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/tag_recycler"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="12dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/working_hours" />
+
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/direction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="18dp"
+            android:background="@drawable/gradient_deep_purple_bg"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="Directions"
+            app:backgroundTint="@null"
+            app:cornerRadius="10dp"
+            app:icon="@drawable/ic_directions"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/call"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/divider" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/call"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="52dp"
+            android:layout_marginBottom="18dp"
+            android:fontFamily="@font/basier_circle_medium"
+            android:insetTop="0dp"
+            android:text="Appeler"
+            android:insetBottom="0dp"
+            android:textColor="#81678F"
+            app:cornerRadius="8dp"
+            app:icon="@drawable/ic_call"
+            app:iconTint="#81678F"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/direction"
+            app:layout_constraintTop_toBottomOf="@+id/divider"
+            app:strokeColor="#81678F"
+            app:strokeWidth="1dp" />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="8dp"
+            android:background="?android:attr/listDivider"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tag_recycler" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

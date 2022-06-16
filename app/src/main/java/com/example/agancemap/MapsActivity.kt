@@ -126,7 +126,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
      */
 
     fun getInwiposition(city:String):List<InwiPosition>{
-      return  places.filter { it.city.labelFr.toLowerCase().contains(city) }
+      return  places.filter { it.city.labelFr.toLowerCase().contains(city.toLowerCase()) }
     }
 
     fun setMarkerToMap(googleMap: GoogleMap,places: List<InwiPosition>){

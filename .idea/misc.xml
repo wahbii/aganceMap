@@ -3,11 +3,9 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/Users/ayoub/Desktop/map/aganceMap/app/src/main/res/drawable/background_seach.xml" value="0.19" />
-        <entry key="..\:/Users/ayoub/Desktop/map/aganceMap/app/src/main/res/drawable/ic_launcher_background.xml" value="0.19" />
-        <entry key="..\:/Users/ayoub/Desktop/map/aganceMap/app/src/main/res/drawable/ic_launcher_foreground.xml" value="0.19" />
-        <entry key="..\:/Users/ayoub/Desktop/map/aganceMap/app/src/main/res/drawable/ic_launcher_foreground_magento.xml" value="0.19" />
-        <entry key="..\:/Users/ayoub/Desktop/map/aganceMap/app/src/main/res/layout/activity_maps.xml" value="0.2851851851851852" />
+        <entry key="app/src/main/res/drawable/gradient_deep_purple_bg.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/view_layout.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/agance_layout.xml" value="0.18" />
         <entry key="app/src/main/res/layout/marker_info_contents.xml" value="0.1" />
       </map>
     </option>
